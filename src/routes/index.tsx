@@ -2,6 +2,7 @@ import { createFileRoute, Link } from '@tanstack/react-router';
 import { Lightbulb } from 'lucide-react';
 import { fetchIdeas } from '@/api/ideas';
 import { queryOptions, useSuspenseQuery } from '@tanstack/react-query';
+import IdeaCard from '@/components/IdeaCard';
 
 const ideasQueryOptions = queryOptions({
   queryKey: ['ideas'],
@@ -37,24 +38,11 @@ function App() {
         <h2 className="mb-4 text-2xl font-semibold text-gray-800">
           Latest Ideas
         </h2>
-        <ul className="space-y-6">
+        <div className="space-y-6">
           {latestIdeas.map((idea) => (
-            <li
-              key={idea.id}
-              className="rounded-lg border border-gray-300 bg-white p-4 shadow"
-            >
-              <h3 className="text-lg font-bold text-gray-900">{idea.title}</h3>
-              <p className="mb-2 text-gray-600">{idea.summary}</p>
-              <Link
-                to="/ideas/$ideaId"
-                params={{ ideaId: idea.id.toString() }}
-                className="text-blue-600 hover:underline"
-              >
-                Read More →
-              </Link>
-            </li>
+            <IdeaCard key={idea.id} idea={idea} button={false} />
           ))}
-        </ul>
+        </div>
 
         <div className="mt-6">
           <a
