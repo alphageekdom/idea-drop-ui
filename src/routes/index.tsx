@@ -10,17 +10,20 @@ const ideasQueryOptions = queryOptions({
 });
 
 export const Route = createFileRoute('/')({
-  component: App,
+  component: HomePage,
   loader: ({ context }) =>
     context.queryClient.ensureQueryData(ideasQueryOptions),
 });
 
-function App() {
+function HomePage() {
   const { data: ideas } = useSuspenseQuery(ideasQueryOptions);
 
-  // console.log(ideas);
-
-  const latestIdeas = ideas.slice(0, 3);
+  const latestIdeas = [...ideas]
+    .sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    )
+    .slice(0, 3);
 
   return (
     <div className="flex flex-col items-start justify-between gap-10 p-6 text-blue-600 md:flex-row">

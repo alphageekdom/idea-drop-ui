@@ -26,3 +26,7 @@ export const createIdea = async (newIdea: {
 
   return res.data;
 };
+
+export const deleteIdea = async (ideaId: string): Promise<void> => {
+  await api.delete(`/ideas/${ideaId}`);
+};
