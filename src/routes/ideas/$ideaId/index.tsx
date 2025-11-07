@@ -45,11 +45,21 @@ function IdeaDetailsPage() {
   return (
     <div className="p-4">
       <Link to="/ideas" className="mb-4 block text-blue-500 underline">
-        ⬅ Back To Ideas
+        ← Back To Ideas
       </Link>
       <h2 className="text-2xl font-bold">{idea.title}</h2>
       <p className="mt-2">{idea.description}</p>
 
+      {/* Edit Link */}
+      <Link
+        to="/ideas/$ideaId/edit"
+        params={{ ideaId }}
+        className="mt-4 mr-2 inline-block rounded bg-yellow-500 px-4 py-2 text-sm text-white transition hover:bg-yellow-600"
+      >
+        Edit
+      </Link>
+
+      {/* Delete Button */}
       <button
         className="disabled:opacity:50 mt-4 cursor-pointer rounded bg-red-600 px-4 py-2 text-sm text-white transition hover:bg-red-700"
         disabled={isPending}

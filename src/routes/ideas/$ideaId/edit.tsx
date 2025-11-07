@@ -1,54 +1,69 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
-import { createIdea } from '@/api/ideas';
-import { useMutation } from '@tanstack/react-query';
+import {
+  useMutation,
+  useSuspenseQuery,
+  queryOptions,
+} from '@tanstack/react-query';
+import { fetchIdea, updateIdea } from '@/api/ideas';
 
-export const Route = createFileRoute('/ideas/new/')({
-  component: NewIdeaPage,
+const ideaQueryOptions = (id: string) =>
+  queryOptions({
+    queryKey: ['idea', id],
+    queryFn: () => fetchIdea(id),
+  });
+
+export const Route = createFileRoute('/ideas/$ideaId/edit')({
+  component: IdeaEditPage,
+  loader: async ({ params, context: { queryClient } }) => {
+    return queryClient.ensureQueryData(ideaQueryOptions(params.ideaId));
+  },
 });
 
-function NewIdeaPage() {
+function IdeaEditPage() {
+  const { ideaId } = Route.useParams();
   const navigate = useNavigate();
-  const [title, setTitle] = useState('');
-  const [summary, setSummary] = useState('');
-  const [description, setDescription] = useState('');
-  const [tags, setTags] = useState('');
+  const { data: idea } = useSuspenseQuery(ideaQueryOptions(ideaId));
+
+  const [title, setTitle] = useState(idea.title);
+  const [summary, setSummary] = useState(idea.summary);
+  const [description, setDescription] = useState(idea.description);
+  const [tagsInput, setTagsInput] = useState(idea.tags.join(', '));
+
+  // console.log(idea);
 
   const { mutateAsync, isPending } = useMutation({
-    mutationFn: createIdea,
+    mutationFn: () =>
+      updateIdea(ideaId, {
+        title,
+        summary,
+        description,
+        tags: tagsInput
+          .split('.')
+          .map((t) => t.trim())
+          .filter(Boolean),
+      }),
     onSuccess: () => {
-      navigate({ to: '/ideas' });
+      navigate({ to: '/ideas/$ideaId', params: { ideaId } });
     },
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!title.trim() || !summary.trim() || !description.trim()) {
-      alert('Please fill in all fields');
-      return;
-    }
-
-    try {
-      await mutateAsync({
-        title,
-        summary,
-        description,
-        tags: tags
-          .split(',')
-          .map((tag) => tag.trim())
-          .filter((tag) => tag !== ''),
-      });
-    } catch (error) {
-      console.error(error);
-      alert('Something went wrong');
-    }
+    await mutateAsync();
   };
 
   return (
     <div className="space-y-4">
       <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Create New Idea</h1>
+        <h1 className="text-2xl font-bold">Edit Idea</h1>
+        <Link
+          to="/ideas/$ideaId"
+          params={{ ideaId }}
+          className="text-sm text-blue-600 hover:underline"
+        >
+          ← Back To Idea
+        </Link>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-2">
@@ -113,8 +128,8 @@ function NewIdeaPage() {
           <input
             id="tags"
             type="text"
-            value={tags}
-            onChange={(e) => setTags(e.target.value)}
+            value={tagsInput}
+            onChange={(e) => setTagsInput(e.target.value)}
             className="w-full rounded-md border border-gray-300 p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
             placeholder="optional tags, comma separated"
           />
@@ -124,9 +139,9 @@ function NewIdeaPage() {
           <button
             type="submit"
             disabled={isPending}
-            className="block w-full rounded-md bg-blue-600 px-6 py-2 font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="block w-full cursor-pointer rounded-md bg-blue-600 px-6 py-2 font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {isPending ? 'Creating...' : 'Create Idea'}
+            {isPending ? 'Updating...' : 'Update Idea'}
           </button>
         </div>
       </form>
