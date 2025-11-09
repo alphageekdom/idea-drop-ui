@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 import { createIdea } from '@/api/ideas';
 import { useMutation } from '@tanstack/react-query';
@@ -124,7 +124,7 @@ function NewIdeaPage() {
           <button
             type="submit"
             disabled={isPending}
-            className="block w-full rounded-md bg-blue-600 px-6 py-2 font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="block w-full cursor-pointer rounded-md bg-blue-600 px-6 py-2 font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isPending ? 'Creating...' : 'Create Idea'}
           </button>
