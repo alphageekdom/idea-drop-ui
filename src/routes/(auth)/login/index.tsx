@@ -1,5 +1,8 @@
-import { createFileRoute, Link } from '@tanstack/react-router';
-import { useState } from 'react';
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
+import React, { useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
+import { loginUser } from '@/api/auth';
+import { useAuth } from '@/context/AuthContext';
 
 export const Route = createFileRoute('/(auth)/login/')({
   component: LoginPage,
@@ -8,12 +11,40 @@ export const Route = createFileRoute('/(auth)/login/')({
 function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+
+  const navigate = useNavigate();
+  const { setAccessToken, setUser } = useAuth();
+
+  const { mutateAsync, isPending } = useMutation({
+    mutationFn: loginUser,
+    onSuccess: (data) => {
+      setAccessToken(data.accessToken);
+      setUser(data.user);
+      navigate({ to: '/ideas' });
+    },
+    onError: (err) => {
+      setError(err.message);
+    },
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    await mutateAsync({ email, password });
+  };
 
   return (
     <div className="mx-auto max-w-md">
       <h1 className="mb-6 text-3xl font-bold">Login</h1>
 
-      <form action="" className="space-y-4">
+      {error && (
+        <div className="mb-4 rounded bg-red-100 px-4 py-2 text-red-700">
+          {error}
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-4">
         {/* Email Input */}
         <input
           type="email"
@@ -34,8 +65,11 @@ function LoginPage() {
           className="border-gray w-full rounded-md border p-2"
         />
 
-        <button className="w-full rounded-md bg-blue-500 px-4 py-2 font-semibold text-white hover:bg-blue-700 disabled:opacity-50">
-          Login
+        <button
+          disabled={isPending}
+          className="w-full cursor-pointer rounded-md bg-blue-500 px-4 py-2 font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+        >
+          {isPending ? 'Logging In...' : 'Login'}
         </button>
       </form>
 
