@@ -11,6 +11,7 @@ const Header = () => {
   const handleLogout = async () => {
     try {
       await logoutUser();
+      setAccessToken(null);
       setUser(null);
       navigate({ to: '/' });
     } catch (err: any) {
