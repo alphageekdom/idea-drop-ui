@@ -1,7 +1,10 @@
 import { Link } from '@tanstack/react-router';
 import { Lightbulb } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 
 const Header = () => {
+  const { user } = useAuth();
+
   return (
     <header className="bg-white shadow">
       <div className="container mx-auto flex items-center justify-between px-6 py-4">
@@ -19,28 +22,44 @@ const Header = () => {
           >
             Ideas
           </Link>
-          <Link
-            to="/ideas/new"
-            className="rounded-md bg-blue-600 px-4 py-2 leading-none font-medium text-white transition hover:bg-blue-700"
-          >
-            + New Idea
-          </Link>
+
+          {user && (
+            <Link
+              to="/ideas/new"
+              className="rounded-md bg-blue-600 px-4 py-2 leading-none font-medium text-white transition hover:bg-blue-700"
+            >
+              + New Idea
+            </Link>
+          )}
         </nav>
 
         {/* Auth Buttons */}
         <div className="flex items-center space-x-2">
-          <Link
-            to="/login"
-            className="px-3 py-2 leading-none font-medium text-gray-600 transition hover:text-gray-700"
-          >
-            Login
-          </Link>
-          <Link
-            to="/register"
-            className="rounded-md bg-gray-100 px-4 py-2 leading-none font-medium text-gray-800 transition hover:bg-gray-200"
-          >
-            Register
-          </Link>
+          {!user ? (
+            <>
+              <Link
+                to="/login"
+                className="px-3 py-2 leading-none font-medium text-gray-600 transition hover:text-gray-700"
+              >
+                Login
+              </Link>
+              <Link
+                to="/register"
+                className="rounded-md bg-gray-100 px-4 py-2 leading-none font-medium text-gray-800 transition hover:bg-gray-200"
+              >
+                Register
+              </Link>
+            </>
+          ) : (
+            <>
+              <span className="px-2 font-medium text-gray-700">
+                Welcome, {user.name}
+              </span>
+              <button className="font medium cursor-pointer px-3 py-2 leading-none text-red-600 transition hover:text-red-900">
+                Logout
+              </button>
+            </>
+          )}
         </div>
       </div>
     </header>
